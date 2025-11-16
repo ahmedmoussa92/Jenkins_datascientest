@@ -1,8 +1,7 @@
 pipeline {
     agent any
     environment {
-        DOCKERHUB_USER = "ahmedmoussa"
-        // DOCKERHUB_PASS will be injected from Jenkins credentials
+        // Docker Hub username will come from credentials
     }
     stages {
         stage('Checkout') {
@@ -23,8 +22,7 @@ pipeline {
         stage('Push Docker Images') {
             steps {
                 script {
-                    // Wrap Docker login and push in withCredentials
-                    withCredentials([string(credentialsId: 'dockerhub-token', variable: 'DOCKERHUB_PASS')]) {
+                    withCredentials([usernamePassword(credentialsId: 'dockerhub-token', usernameVariable: 'DOCKERHUB_USER', passwordVariable: 'DOCKERHUB_PASS')]) {
                         sh '''
                         echo $DOCKERHUB_PASS | docker login -u $DOCKERHUB_USER --password-stdin
                         docker push $DOCKERHUB_USER/cast-service:latest
