@@ -1,20 +1,16 @@
 pipeline {
     agent any
-
     environment {
+        // DockerHub credentials
         DOCKERHUB_USER = "ahmedmoussa92"
-        DOCKERHUB_PASS = credentials('dockerhub-token') // Jenkins Secret Text or Username+Password token
+        DOCKERHUB_PASS = credentials('dockerhub-token') // Secret text in Jenkins
     }
-
     stages {
-
         stage('Checkout') {
             steps {
-                // Checkout source code from GitHub (configured in Jenkins job)
                 checkout scm
             }
         }
-
         stage('Build Docker Images') {
             steps {
                 script {
@@ -25,46 +21,57 @@ pipeline {
                 }
             }
         }
-
         stage('Push Docker Images') {
             steps {
                 script {
-                    // Log in to Docker Hub using credentials
+                    // Log in to DockerHub using credentials
                     sh 'echo $DOCKERHUB_PASS | docker login -u $DOCKERHUB_USER --password-stdin'
-                    echo "📤 Pushing cast-service..."
                     sh 'docker push $DOCKERHUB_USER/cast-service:latest'
-                    echo "📤 Pushing movie-service..."
                     sh 'docker push $DOCKERHUB_USER/movie-service:latest'
                 }
             }
         }
-
         stage('Deploy to Kubernetes') {
-            steps {
-                script {
-                    // Use Jenkins Secret File 'kubeconfig-dev' to connect to Kubernetes
-                    withKubeConfig([credentialsId: 'kubeconfig-dev']) {
-                        sh '''
-                        helm upgrade --install myapp-dev ./helm/app-chart \
-                            -n dev \
-                            -f ./helm/app-chart/values-dev.yaml
-                        '''
+            parallel {
+                stage('Deploy to Dev') {
+                    steps {
+                        withCredentials([file(credentialsId: 'kubeconfig-dev', variable: 'KUBECONFIG')]) {
+                            sh '''
+                            helm upgrade --install myapp-dev ./helm/app-chart \\
+                                -n dev \\
+                                -f ./helm/app-chart/values-dev.yaml
+                            '''
+                        }
+                    }
+                }
+                stage('Deploy to Staging') {
+                    steps {
+                        withCredentials([file(credentialsId: 'kubeconfig-staging', variable: 'KUBECONFIG')]) {
+                            sh '''
+                            helm upgrade --install myapp-staging ./helm/app-chart \\
+                                -n staging \\
+                                -f ./helm/app-chart/values-staging.yaml
+                            '''
+                        }
+                    }
+                }
+                stage('Deploy to Prod') {
+                    steps {
+                        withCredentials([file(credentialsId: 'kubeconfig-prod', variable: 'KUBECONFIG')]) {
+                            sh '''
+                            helm upgrade --install myapp-prod ./helm/app-chart \\
+                                -n prod \\
+                                -f ./helm/app-chart/values-prod.yaml
+                            '''
+                        }
                     }
                 }
             }
         }
     }
-
     post {
         always {
-            echo "Cleaning up Docker images..."
-            sh 'docker system prune -f'
-        }
-        success {
-            echo "✅ Pipeline completed successfully!"
-        }
-        failure {
-            echo "❌ Pipeline failed. Check logs for details."
+            sh 'docker logout'
         }
     }
 }
