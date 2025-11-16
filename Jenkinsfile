@@ -3,13 +3,13 @@ pipeline {
 
     environment {
         DOCKERHUB_USER = "ahmedmoussa92"
-        DOCKERHUB_PASS = credentials('dockerhub-password-id') // add this in Jenkins credentials
+        DOCKERHUB_PASS = credentials('dockerhub-token') // updated to match your Jenkins credentials
     }
 
     stages {
         stage('Checkout') {
             steps {
-                git branch: 'main', url: 'https://github.com/your-username/Jenkins_datascientest.git'
+                git branch: 'main', url: 'https://github.com/ahmedmoussa92/Jenkins_datascientest.git'
             }
         }
 
@@ -42,7 +42,6 @@ pipeline {
 
         stage('Capture Jenkins Console') {
             steps {
-                // This depends on your Jenkins setup; easiest way is to use "Print to PDF" plugin
                 echo 'Take screenshot / export PDF after build is done'
             }
         }
