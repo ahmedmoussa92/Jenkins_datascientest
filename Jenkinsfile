@@ -1,23 +1,19 @@
 pipeline {
     agent any
     environment {
-        // Ensure you have a Jenkins Secret Text credential named 'dockerhub-token'
         DOCKERHUB_USER = "ahmedmoussa"
-        DOCKERHUB_PASS = credentials('dockerhub-token')
+        // DOCKERHUB_PASS will be injected from Jenkins credentials
     }
     stages {
         stage('Checkout') {
             steps {
-                // Use 'checkout scm' to utilize the SCM configuration defined 
-                // in the Jenkins job setup (Repository URL, Branch, Credentials).
-                checkout scm 
+                checkout scm
             }
         }
         stage('Build Docker Images') {
             steps {
                 script {
                     echo "🚀 Building cast-service image..."
-                    // Note: These paths (./cast-service) are relative to the root of the checked-out repository.
                     sh 'docker build -t $DOCKERHUB_USER/cast-service:latest ./cast-service'
                     echo "🚀 Building movie-service image..."
                     sh 'docker build -t $DOCKERHUB_USER/movie-service:latest ./movie-service'
@@ -27,12 +23,14 @@ pipeline {
         stage('Push Docker Images') {
             steps {
                 script {
-                    // Log in using the injected credentials
-                    sh 'echo $DOCKERHUB_PASS | docker login -u $DOCKERHUB_USER --password-stdin'
-                    echo "📤 Pushing cast-service..."
-                    sh 'docker push $DOCKERHUB_USER/cast-service:latest'
-                    echo "📤 Pushing movie-service..."
-                    sh 'docker push $DOCKERHUB_USER/movie-service:latest'
+                    // Wrap Docker login and push in withCredentials
+                    withCredentials([string(credentialsId: 'dockerhub-token', variable: 'DOCKERHUB_PASS')]) {
+                        sh '''
+                        echo $DOCKERHUB_PASS | docker login -u $DOCKERHUB_USER --password-stdin
+                        docker push $DOCKERHUB_USER/cast-service:latest
+                        docker push $DOCKERHUB_USER/movie-service:latest
+                        '''
+                    }
                 }
             }
         }
