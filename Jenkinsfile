@@ -1,10 +1,5 @@
 pipeline {
     agent any
-    environment {
-        // Make sure you have a Jenkins Secret Text or Username/Password credential for Docker Hub
-        DOCKERHUB_USER = "ahmedmoussa92"
-        DOCKERHUB_PASS = credentials('dockerhub-token') 
-    }
     stages {
         stage('Checkout') {
             steps {
@@ -17,10 +12,10 @@ pipeline {
             steps {
                 script {
                     echo "🚀 Building cast-service image..."
-                    sh 'docker build -t $DOCKERHUB_USER/cast-service:latest ./cast-service'
+                    sh 'docker build -t ahmedmoussa92/cast-service:latest ./cast-service'
 
                     echo "🚀 Building movie-service image..."
-                    sh 'docker build -t $DOCKERHUB_USER/movie-service:latest ./movie-service'
+                    sh 'docker build -t ahmedmoussa92/movie-service:latest ./movie-service'
                 }
             }
         }
@@ -28,14 +23,18 @@ pipeline {
         stage('Push Docker Images') {
             steps {
                 script {
-                    echo "🔐 Logging in to Docker Hub..."
-                    sh 'echo $DOCKERHUB_PASS | docker login -u $DOCKERHUB_USER --password-stdin'
+                    withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', 
+                                                      usernameVariable: 'DOCKERHUB_USER', 
+                                                      passwordVariable: 'DOCKERHUB_PASS')]) {
+                        echo "🔐 Logging in to Docker Hub..."
+                        sh 'echo $DOCKERHUB_PASS | docker login -u $DOCKERHUB_USER --password-stdin'
 
-                    echo "📤 Pushing cast-service..."
-                    sh 'docker push $DOCKERHUB_USER/cast-service:latest'
+                        echo "📤 Pushing cast-service..."
+                        sh 'docker push $DOCKERHUB_USER/cast-service:latest'
 
-                    echo "📤 Pushing movie-service..."
-                    sh 'docker push $DOCKERHUB_USER/movie-service:latest'
+                        echo "📤 Pushing movie-service..."
+                        sh 'docker push $DOCKERHUB_USER/movie-service:latest'
+                    }
                 }
             }
         }
