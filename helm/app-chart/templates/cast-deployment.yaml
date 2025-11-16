@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cast-service
+  labels:
+    app: cast-service
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: cast-service
+  template:
+    metadata:
+      labels:
+        app: cast-service
+    spec:
+      # Init container waits for cast-db to be ready
+      initContainers:
+      - name: wait-for-cast-db
+        image: busybox
+        command:
+          - sh
+          - -c
+          - |
+            echo "Waiting for cast-db..."
+            until nc -z cast-db 5432; do
+              sleep 2
+            done
+            echo "Cast DB ready"
+
+      containers:
+      - name: cast-service
+        image: ahmedmoussa92/cast-service:latest
+        imagePullPolicy: IfNotPresent
+        command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+        ports:
+        - containerPort: 8000
+        env:
+        - name: DATABASE_URI
+          value: "postgresql://cast_db_username:cast_db_password@cast-db:5432/cast_db_dev"

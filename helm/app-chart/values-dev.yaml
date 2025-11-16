@@ -1,0 +1,20 @@
+postgres:
+  storageClass: "local-path"
+  accessMode: ReadWriteOnce
+  storageSize: 1Gi
+
+image:
+  repository: ahmedmoussa92/movie-service
+  tag: latest
+
+castImage:
+  repository: ahmedmoussa92/cast-service
+  tag: latest
+
+movieServiceEnv:
+  DATABASE_URI: "postgresql://movie_db_username:movie_db_password@movie-db:5432/movie_db_dev"
+  CAST_SERVICE_HOST_URL: "http://cast-service:8000/api/v1/casts/"
+
+castServiceEnv:
+  DATABASE_URI: "postgresql://cast_db_username:cast_db_password@cast-db:5432/cast_db_dev"
+ 

@@ -1,0 +1,13 @@
+postgres:
+  storageClass: "local-path"         
+  accessMode: ReadWriteOnce
+  storageSize: 1Gi 
+
+image:
+  repository: ahmedmoussa92/movie-service
+  tag: latest
+castImage:
+  repository: ahmedmoussa92/cast-service
+  tag: latest
+
+  
