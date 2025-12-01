@@ -88,12 +88,14 @@ pipeline {
             }
         }
 
-        stage('Deploy to Production') {
+        stage('Approval for Production') {
             steps {
                 script {
-                    if (env.BRANCH_NAME == 'main') {
-                        input message: "Approve deployment to Production?", ok: "Deploy"
+                    // Always show the approval step
+                    input message: "Approve deployment to Production?", ok: "Approve"
 
+                    if (env.BRANCH_NAME == 'main') {
+                        echo "Deploying to Production..."
                         withCredentials([file(credentialsId: 'kubeconfig-file', variable: 'KUBECONFIG')]) {
                             sh """
                             export KUBECONFIG=$KUBECONFIG
@@ -105,7 +107,7 @@ pipeline {
                             """
                         }
                     } else {
-                        echo "Skipping Production deployment: not on main branch"
+                        echo "Not on main branch, skipping actual Production deployment."
                     }
                 }
             }
