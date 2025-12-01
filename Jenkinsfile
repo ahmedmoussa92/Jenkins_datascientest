@@ -45,7 +45,7 @@ pipeline {
 
         stage('Deploy to Dev') {
             steps {
-                withCredentials([file(credentialsId: 'kubeconfig-dev', variable: 'KUBECONFIG')]) {
+                withCredentials([file(credentialsId: 'kubeconfig-file', variable: 'KUBECONFIG')]) {
                     sh """
                     export KUBECONFIG=$KUBECONFIG
                     helm upgrade --install app-dev ./helm/app-chart \
@@ -60,7 +60,7 @@ pipeline {
 
         stage('Deploy to QA') {
             steps {
-                withCredentials([file(credentialsId: 'kubeconfig-dev', variable: 'KUBECONFIG')]) {
+                withCredentials([file(credentialsId: 'kubeconfig-file', variable: 'KUBECONFIG')]) {
                     sh """
                     export KUBECONFIG=$KUBECONFIG
                     helm upgrade --install app-qa ./helm/app-chart \
@@ -75,7 +75,7 @@ pipeline {
 
         stage('Deploy to Staging') {
             steps {
-                withCredentials([file(credentialsId: 'kubeconfig-dev', variable: 'KUBECONFIG')]) {
+                withCredentials([file(credentialsId: 'kubeconfig-file', variable: 'KUBECONFIG')]) {
                     sh """
                     export KUBECONFIG=$KUBECONFIG
                     helm upgrade --install app-staging ./helm/app-chart \
@@ -104,7 +104,7 @@ pipeline {
                 branch 'main'
             }
             steps {
-                withCredentials([file(credentialsId: 'kubeconfig-dev', variable: 'KUBECONFIG')]) {
+                withCredentials([file(credentialsId: 'kubeconfig-file', variable: 'KUBECONFIG')]) {
                     sh """
                     export KUBECONFIG=$KUBECONFIG
                     helm upgrade --install app-prod ./helm/app-chart \
