@@ -91,9 +91,7 @@ pipeline {
        
 
         stage('Deploy to Production') {
-            when {
-                branch 'main'
-            }
+            
             steps {
                 withCredentials([file(credentialsId: 'kubeconfig-file', variable: 'KUBECONFIG')]) {
                     sh """
