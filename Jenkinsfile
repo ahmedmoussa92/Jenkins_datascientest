@@ -90,13 +90,10 @@ pipeline {
 
         stage('Deploy to Production') {
             when {
-                branch 'main'  // Only deploy if on the main branch
+                branch 'main'   // Only run on main branch
             }
             steps {
-                // Uncomment the next line if you want manual approval
-                // input message: "Approve deployment to Production?", ok: "Deploy"
-
-                echo "Deploying to production..."
+                input message: "Approve deployment to Production?", ok: "Deploy"
                 withCredentials([file(credentialsId: 'kubeconfig-file', variable: 'KUBECONFIG')]) {
                     sh """
                     export KUBECONFIG=$KUBECONFIG
@@ -109,7 +106,6 @@ pipeline {
                 }
             }
         }
-
-    } // end of stages
-} // end of pipeline
+    }
+}
     
