@@ -88,16 +88,7 @@ pipeline {
             }
         }
 
-        stage('Approval for Production') {
-            when {
-                branch 'main'
-            }
-            steps {
-                timeout(time: 10, unit: 'MINUTES') {
-                    input message: "Deploy to Production?"
-                }
-            }
-        }
+       
 
         stage('Deploy to Production') {
             when {
