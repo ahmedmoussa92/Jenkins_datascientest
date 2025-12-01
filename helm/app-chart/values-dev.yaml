@@ -1,3 +1,6 @@
+service:
+  nginxType: ClusterIP
+
 postgres:
   storageClass: "local-path"
   accessMode: ReadWriteOnce
@@ -17,4 +20,5 @@ movieServiceEnv:
 
 castServiceEnv:
   DATABASE_URI: "postgresql://cast_db_username:cast_db_password@cast-db:5432/cast_db_dev"
+ 
  

@@ -1,3 +1,6 @@
+service:
+  nginxType: ClusterIP
+
 postgres:
   storageClass: "local-path"         
   accessMode: ReadWriteOnce
