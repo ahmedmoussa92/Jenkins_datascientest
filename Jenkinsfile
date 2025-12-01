@@ -92,8 +92,11 @@ pipeline {
             when {
                 branch 'main'   // Only run on main branch
             }
+            input {
+                message "Approve deployment to Production?"
+                ok "Deploy"
+            }
             steps {
-                input message: "Approve deployment to Production?", ok: "Deploy"
                 withCredentials([file(credentialsId: 'kubeconfig-file', variable: 'KUBECONFIG')]) {
                     sh """
                     export KUBECONFIG=$KUBECONFIG
