@@ -88,10 +88,14 @@ pipeline {
             }
         }
 
-       
-
         stage('Deploy to Production') {
-            
+            when {
+                branch 'master'   // Only run for Master branch
+            }
+            input {
+                message "Approve deployment to Production?"
+                ok "Deploy"
+            }
             steps {
                 withCredentials([file(credentialsId: 'kubeconfig-file', variable: 'KUBECONFIG')]) {
                     sh """
