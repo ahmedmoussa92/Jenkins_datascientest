@@ -89,21 +89,27 @@ pipeline {
         }
 
         stage('Deploy to Production') {
-    when {
-        branch 'main'   
-    }
-    steps {
-        input message: "Approve deployment to Production?", ok: "Deploy"
-        withCredentials([file(credentialsId: 'kubeconfig-file', variable: 'KUBECONFIG')]) {
-            sh """
-            export KUBECONFIG=$KUBECONFIG
-            helm upgrade --install app-prod ./helm/app-chart \
-                --namespace prod --create-namespace \
-                -f ./helm/app-chart/values-prod.yaml \
-                --set cast.image=$REGISTRY/cast-service:$IMAGE_TAG \
-                --set movie.image=$REGISTRY/movie-service:$IMAGE_TAG
-            """
+            when {
+                branch 'main'  // Only deploy if on the main branch
+            }
+            steps {
+                // Uncomment the next line if you want manual approval
+                // input message: "Approve deployment to Production?", ok: "Deploy"
+
+                echo "Deploying to production..."
+                withCredentials([file(credentialsId: 'kubeconfig-file', variable: 'KUBECONFIG')]) {
+                    sh """
+                    export KUBECONFIG=$KUBECONFIG
+                    helm upgrade --install app-prod ./helm/app-chart \
+                        --namespace prod --create-namespace \
+                        -f ./helm/app-chart/values-prod.yaml \
+                        --set cast.image=$REGISTRY/cast-service:$IMAGE_TAG \
+                        --set movie.image=$REGISTRY/movie-service:$IMAGE_TAG
+                    """
+                }
+            }
         }
-    }
-}
+
+    } // end of stages
+} // end of pipeline
     
