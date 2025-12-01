@@ -90,7 +90,7 @@ pipeline {
 
         stage('Deploy to Production') {
             when {
-                branch 'master'   // Only run for Master branch
+                branch 'main'   // Only run for Master branch
             }
             input {
                 message "Approve deployment to Production?"
